@@ -1,0 +1,147 @@
+body, html {
+    height: 100%;
+    margin: 0;
+   /* font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;*/
+}
+
+
+
+
+.nav-left {
+    background-color: rgb(31 41 55);
+    height: 100vh;
+    transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
+    position: fixed;
+    top: 0;
+    left: 0;
+    transform: translateX(-100%);
+    z-index: 40;
+}
+
+.nav-left.show {
+    transform: translateX(0);
+}
+
+@media (min-width: 1024px) {
+    .nav-left {
+        transform: translateX(0);
+        width: 200px;
+        position: relative;
+    }
+
+    .nav-left-hidden {
+        width: 60px;
+        overflow: hidden;
+    }
+
+    .nav-left-hidden ul li span,
+    .nav-left-hidden .nav-title {
+        display: none;
+    }
+
+    .nav-left-hidden ul li img {
+        margin-right: 0;
+    }
+}
+
+@media (max-width: 1024px) {
+    .nav-left {
+        width: 200px;
+    }
+
+    .nav-left-hidden {
+        width: 60px;
+        overflow: hidden;
+    }
+
+   
+
+    .nav-left-hidden ul li img {
+        margin-right: 0;
+    }
+}
+
+.nav-link:focus, .nav-link:active {
+    background-color: rgb(12 74 110);
+    outline: none;
+    color: white;
+}
+
+.nav-link.active {
+    background-color: rgb(12 74 110);    
+    color: white; /* Text color for active link */
+}
+
+
+
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #ffffff;
+    min-width: 140px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 5px;
+    right: 0; /* Aligns dropdown to the right */
+}
+
+.dropdown-content a {
+    color: #333;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    font-size: 13px;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+/* Container styling */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+
+
+.dropdown-content img {
+    width: 18px; /* Adjust size */
+    height: 18px; /* Adjust size */
+}
+.dropdown-content a {
+    color: black; /* Adjust text color */
+    display: flex;
+    align-items: center;
+}
+
+
+
+/*
+#loading-overlay {
+    z-index: 9999;
+}
+
+.loader {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #3498db;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+*/
+
+.drop-arrow {
+    width: 0.5rem; 
+    height: 0.5rem; 
+    margin-left: 0.25rem; 
+    margin-top: 0.15rem; 
+    filter: brightness(0) saturate(100%);
+}

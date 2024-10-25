@@ -1,0 +1,265 @@
+* {
+   
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    padding: 0;
+    margin: 0;
+    
+
+}
+
+
+
+
+
+
+
+.product-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-top: 100px;
+    
+}
+
+/* Individual product section */
+section {
+    flex: 1 1 calc(20% - 5px); 
+    box-sizing: border-box; 
+    width: 100%; 
+    padding: 10px;
+}
+
+/* Center content inside the product sections */
+.cont-1 {
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-color: rgba(124, 124, 124, 0.8); 
+    border-radius: 8px;
+    text-align: center;
+    height: auto;
+    border: 1px solid #ccc;
+    max-width: 280px; 
+    word-wrap: break-word; 
+    overflow: hidden; 
+}
+
+/* Styling for the product description and price */
+.cont-1 p {
+    margin: 5px 0;
+    font-size: 13px;
+    line-height: 1.4; 
+    max-height: 40px; 
+    overflow: hidden;
+    text-overflow: ellipsis; 
+    white-space: normal; 
+    display: -webkit-box; 
+    -webkit-box-orient: vertical; 
+ 
+    color: white;
+}
+
+
+/* Styling for the product image */
+.cg img {
+    max-width: 100%;
+    max-height: 110px; 
+    object-fit: contain; 
+    margin-bottom: 10px;
+    transition: transform 0.3s ease;
+}
+
+
+.cg img:hover {
+    transform: scale(1.5); 
+}
+
+
+/* Buttons style (reused from previous styles) 
+.btn1, .btn2 {
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 7px;
+    cursor: pointer;
+    margin: 5px;
+    transition: background-color 0.3s ease;
+    text-transform: uppercase;
+}
+*/
+
+
+
+/*
+.btn1{
+    background-color: rgb(104, 48, 48);
+}
+
+.btn2{
+    background-color: rgb(92, 92, 12);
+}
+*/
+/*
+.btn1:hover {
+    background-color: #a70b0b;  Darker background on hover 
+}
+
+.btn2:hover{
+    background-color: #c59204; /* Darker background on hover 
+}
+
+.btn1:active, .btn2:active {
+    background-color: #333; /* Even darker background on click 
+    transform: translateY(2px); /* Slight push down effect on click 
+}
+*/
+
+
+
+footer {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+    position: relative;
+    bottom: 0;
+    
+    margin-top: 50px;
+    
+}
+
+/*
+.material-symbols-outlined{
+    font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+  
+    margin-right: 30px;
+    cursor: pointer;
+    color:white;
+    
+  }*/
+
+
+ /* Dropdown styles */
+ .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #ffffff;
+    min-width: 140px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 5px;
+    right: 0; 
+}
+
+.dropdown-content a {
+    color: #333;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    font-size: 13px;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+/* Container styling */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+
+
+
+.header-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50; 
+    transition: background-color 0.3s ease; 
+}
+
+.scrolled {
+    --tw-bg-opacity: 1;
+    background-color: rgb(31 41 55 / var(--tw-bg-opacity)) ;
+    --tw-shadow-color: #000;         
+ }
+
+
+
+
+  /* Mobile Navigation Styles */
+        
+#nav-links {
+    max-height: 0; 
+    overflow: hidden;
+    flex-direction: column; 
+    transition: max-height 0.3s ease-in-out;
+    
+}
+
+#nav-links.show {
+    max-height: 250px; 
+    display: flex; 
+}
+
+/* Styles for large screens */
+@media (min-width: 1024px) {
+    #nav-links {
+        max-height: none;
+        position: static;
+        display: flex;
+        flex-direction: row;
+        background-color: transparent;
+        height: auto;
+        z-index: auto;
+        overflow: visible;
+    }
+
+    /* Hide menu button on large screens */
+    #menu-toggle {
+        display: none; 
+    }
+
+    /* Center content on larger screens */
+    .header-fixed {
+        justify-content: center;
+    }
+
+    .header-fixed .w-full {
+        display: flex;
+        justify-content: space-between;
+        max-width: 1200px; 
+    }
+}
+
+/* Menu Button Styles */
+#menu-toggle {
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1001;
+    display: block;
+}
+
+
+/* Hide menu button on large screens */
+@media (min-width: 1024px) {
+    #menu-toggle {
+        display: none; 
+    }
+}
+
+
+

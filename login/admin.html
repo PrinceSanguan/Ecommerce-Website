@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Admin/User</title>
+</head>
+<body class="bg-[url('images/bg1.png')] bg-center bg-cover bg-fixed min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-neutral-100 rounded-lg shadow-lg w-96 max-w-md shadow-black-500/50 p-6">
+        
+        <div class="flex items-center p-2 relative">
+           
+            <img src="images/logo.jpg" class="w-10 h-10 rounded-full cursor-pointer absolute left-2">
+            <h1 class="text-xl font-semibold text-black mx-auto">Admin</h1>
+        </div>
+        
+        <form action="#" method="post" class="space-y-2 mt-4">
+            <div class="relative">
+                <input type="email" name="email" required placeholder="Email" class="w-full p-2 pr-10 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-sky-900">
+                <img src="images/icons8-user-24 (1).png" alt="User Icon" class="absolute right-2 top-1/2 transform -translate-y-1/2 w-5 h-5">
+            </div>
+
+            <div class="relative">
+                <input type="password" name="password" placeholder="Password" required class="w-full p-2 pr-10 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-sky-900">
+                <img src="images/icons8-lock-30.png" alt="User Icon" class="absolute right-2 top-1/2 transform -translate-y-1/2 w-5 h-5">
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <a href="#" class="text-sm text-sky-900 hover:underline">Back to Shop</a>
+                <input type="submit" value="Sign in" class="w-full sm:w-auto py-2 px-4 bg-sky-900 text-white rounded hover:bg-sky-700 cursor-pointer text-sm">
+            </div>
+            
+            
+        </form>
+    </div>
+</body>
+</html>
