@@ -194,10 +194,6 @@ $sql = "SELECT p.id, p.name, p.price,
         ORDER BY sh.date_added DESC";
 
 
-
-
-
-
 // Clean up
 $product_stmt->close();
 $category_stmt->close();

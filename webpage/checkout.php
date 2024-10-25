@@ -17,6 +17,79 @@ if ($connection->connect_error) {
 $user_email = $_SESSION['user_email'];
 $user_name = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : '';
 
+// Handle adding item to cart when coming from checkout button
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['product_id'])) {
+    $product_id = $_POST['product_id'];
+    $quantity = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1;
+    
+    // Fetch the product details, including stock
+    $query = "SELECT p.*, IFNULL(SUM(sh.stock_quantity), 0) AS stock_quantity 
+              FROM product_list AS p
+              LEFT JOIN stock_history AS sh ON p.id = sh.product_id AND sh.deleted = 0 
+              WHERE p.id = ?";
+    
+    $stmt = $connection->prepare($query);
+    $stmt->bind_param("i", $product_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $product = $result->fetch_assoc();
+        
+        // Check if the product is in stock
+        if (isset($product['stock_quantity']) && $product['stock_quantity'] > 0) {
+            // Prepare the cart item
+            $cart_item = [
+                'id' => $product['id'],
+                'name' => $product['name'],
+                'price' => $product['price'],
+                'quantity' => $quantity,
+                'image_url' => $product['image'],
+                'brand' => $product['brand'],
+                'category' => $product['category']
+            ];
+
+            // Initialize cart if not exists
+            if (!isset($_SESSION['cart']) || !is_array($_SESSION['cart'])) {
+                $_SESSION['cart'] = [];
+            }
+
+            // Check if product already exists in cart
+            $found = false;
+            foreach ($_SESSION['cart'] as &$item) {
+                if (is_array($item) && $item['id'] == $product_id) {
+                    $item['quantity'] += $quantity;
+                    $found = true;
+                    break;
+                }
+            }
+
+            // Add new item if not found
+            if (!$found) {
+                $_SESSION['cart'][] = $cart_item;
+
+                // Insert into cart table
+                $insert_query = "INSERT INTO cart (user_email, product_id, product_name, quantity, price) 
+                               VALUES (?, ?, ?, ?, ?)";
+                $insert_stmt = $connection->prepare($insert_query);
+                $insert_stmt->bind_param("sssid", 
+                    $user_email, 
+                    $product['id'], 
+                    $product['name'], 
+                    $quantity, 
+                    $product['price']
+                );
+                $insert_stmt->execute();
+                $insert_stmt->close();
+            }
+        } else {
+            $_SESSION['error_message'] = "This product is out of stock";
+            header("Location: products.php");
+            exit;
+        }
+    }
+}
+
 // Fetch client details including phone number
 $client_query = "SELECT firstname, lastname, phone, address FROM client_list WHERE email = ?";
 $stmt = $connection->prepare($client_query);
@@ -24,12 +97,6 @@ $stmt->bind_param("s", $user_email);
 $stmt->execute();
 $result = $stmt->get_result();
 $client = $result->fetch_assoc();
-
-/* // Redirect to cart if the cart is empty
-if (empty($_SESSION['cart'])) {
-    header("Location: cart.php");
-    exit();
-} */
 
 // Calculate total price
 $total_price = 0;
@@ -45,6 +112,12 @@ foreach ($_SESSION['cart'] as $item) {
     if (isset($item['quantity'])) {
         $item_count += $item['quantity'];
     }
+}
+
+// If cart is empty after attempting to add items, redirect to products
+if (empty($_SESSION['cart'])) {
+    header("Location: products.php");
+    exit();
 }
 ?>
 
