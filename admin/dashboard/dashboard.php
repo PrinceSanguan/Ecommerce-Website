@@ -175,7 +175,7 @@ $conn->close();
                     </a>
                 </div>
                 <div>
-                    <a href="/wbsif/login/client/logout.php" class="flex items-center p-2 hover:bg-gray-500">
+                    <a href="../../login/client/logout.php" class="flex items-center p-2 hover:bg-gray-500">
                         <img src="../images/icons8-logout-50.png" class="w-5 h-5 mr-2 ml-1">
                         <span>Logout</span>
                     </a>

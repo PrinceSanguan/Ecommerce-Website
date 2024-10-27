@@ -10,7 +10,7 @@ $connection = new mysqli($servername, $username, $password, $database);
 
 // Check if user is logged in
 if (!isset($_SESSION['logged_in']) || $_SESSION['user_role'] !== 'client') {
-    header("location: /wbsif/webpage/Home.php");
+    header("location: webpage/Home.php");
     exit;
 }
 
@@ -81,7 +81,7 @@ foreach ($_SESSION['cart'] as $item) {
                         <div class="dropdown-content px-0.5 py-0.5">
                             <a href="#">Chat Bot</a>
                             <a href="manage_account.php">Manage Account</a>
-                            <a href="/wbsif/login/client/logout.php">Logout</a>
+                            <a href="../login/client/logout.php">Logout</a>
                         </div>
                     </li>
                 </ul>

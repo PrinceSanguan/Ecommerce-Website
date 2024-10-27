@@ -466,8 +466,25 @@ $connection->close();
                         navLinks.classList.toggle("hidden");
                     });
                 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+      // Check for error message
+      <?php if (isset($_SESSION['error'])): ?>
+          Swal.fire({
+              icon: 'info',
+              title: 'Warning!',
+              text: '<?php echo addslashes($_SESSION['error']); ?>',
+              confirmButtonText: 'OK'
+          });
+          <?php unset($_SESSION['error']); // Clear the session variable ?>
+      <?php endif; ?>
+  });
+</script>
 </body>
 </html>
+
 
 
 

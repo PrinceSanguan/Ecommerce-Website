@@ -29,7 +29,7 @@ if ($order_id) {
     $order_stmt->bind_param("i", $order_id);
     $order_stmt->execute();
     $order_result = $order_stmt->get_result();
-    
+
     if ($order_result->num_rows > 0) {
         $order = $order_result->fetch_assoc();
         
@@ -38,16 +38,19 @@ if ($order_id) {
         $payment_method = $order['payment_method'];
         $order_date = $order['order_date'];
         $order_status = $order['status'];
-        $order_number = $order['order_number'];
+        $order_number = $order['order_number']; // Retrieve order number from the database
 
         // Fetch ordered items for this order
-        // Modified query to use only order_items table since we don't need to join
-        $items_stmt = $connection->prepare("
-            SELECT * 
-            FROM order_items 
-            WHERE order_id = ?
-        ");
-        
+        // Fetch ordered items for this order
+$items_stmt = $connection->prepare("
+SELECT oi.*, pl.image
+FROM order_items AS oi
+JOIN product_list AS pl ON oi.image_url = pl.image
+WHERE oi.order_id = ?
+");
+
+
+        $items_stmt = $connection->prepare("SELECT * FROM order_items WHERE order_id = ?");
         $items_stmt->bind_param("i", $order_id);
         $items_stmt->execute();
         $items_result = $items_stmt->get_result();
@@ -56,13 +59,13 @@ if ($order_id) {
         while ($item = $items_result->fetch_assoc()) {
             $items[] = $item;
         }
-        
+
         $items_stmt->close(); // Close the statement for items
     } else {
         echo "No order found.";
         exit;
     }
-    
+
     $order_stmt->close(); // Close the order statement
 } else {
     echo "Invalid order ID.";
@@ -99,7 +102,7 @@ if ($order_id) {
             <?php foreach ($items as $item): ?>
                 <li class="flex justify-between items-center mt-2">
                     <div class="flex items-center">
-                        <img src="../../uploads/<?php echo htmlspecialchars($item['image_url']); ?>" 
+                        <img src="../uploads/<?php echo htmlspecialchars($item['image_url']); ?>" 
                              alt="<?php echo htmlspecialchars($item['item_name']); ?>" 
                              class="w-16 h-16 object-cover rounded mr-4">
                         <span><?php echo htmlspecialchars($item['item_name']); ?> - <?php echo (int)$item['quantity']; ?> pcs</span>
@@ -112,11 +115,6 @@ if ($order_id) {
         <?php endif; ?>
     </ul>
 </div>
-
-
-
-
-
 
             <div class="mt-6 text-center">
                 <a href="orders.php" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500">Back to Orders</a>

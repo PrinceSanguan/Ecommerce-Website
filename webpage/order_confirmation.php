@@ -20,14 +20,14 @@ if (!isset($_SESSION['user_email'])) {
     exit();
 }
 
-// Generate a unique order number (consider switching to a sequential or UUID approach)
+// Generate a unique order number
 $order_number = rand(100000, 999999);
 $total_price = isset($_SESSION['total_price']) ? $_SESSION['total_price'] : 0;
 $payment_method = isset($_SESSION['payment_method']) ? $_SESSION['payment_method'] : '';
-$order_date = date("Y-m-d H:i:s"); // Get the current date and time
+$order_date = date("Y-m-d H:i:s");
 
 // Insert order details into the database only if it does not already exist
-$user_id = $_SESSION['user_id']; // Ensure the user's ID is in session
+$user_id = $_SESSION['user_id'];
 
 // Check if the order already exists for this user
 $check_order_query = "SELECT * FROM orders WHERE user_id = ? AND order_number = ?";
@@ -42,7 +42,7 @@ if ($result->num_rows == 0) {
     $stmt = $connection->prepare($query);
     $stmt->bind_param("sssss", $order_number, $user_id, $total_price, $payment_method, $order_date);
     $stmt->execute();
-    $stmt->close(); // Close the statement
+    $stmt->close();
 
     // Get the last inserted order ID
     $order_id = $connection->insert_id;
@@ -50,17 +50,51 @@ if ($result->num_rows == 0) {
     // Save each cart item to the order_items table
     if (!empty($_SESSION['cart'])) {
         foreach ($_SESSION['cart'] as $item) {
-            $item_query = "INSERT INTO order_items (order_id, item_name, price, quantity, image_url) VALUES (?, ?, ?, ?, ?)";
-            $item_stmt = $connection->prepare($item_query);
-            $item_stmt->bind_param("isdis", $order_id, $item['name'], $item['price'], $item['quantity'], $item['image_url']);
-            $item_stmt->execute();
-            $item_stmt->close(); // Close the item statement
+            // Check stock availability
+            $check_stock_query = "SELECT stock_quantity FROM stock_history WHERE product_id = (SELECT id FROM product_list WHERE name = ?) AND deleted = 0 LIMIT 1";
+            $stock_stmt = $connection->prepare($check_stock_query);
+            $stock_stmt->bind_param("s", $item['name']);
+            $stock_stmt->execute();
+            $stock_result = $stock_stmt->get_result();
+
+            if ($stock_result->num_rows > 0) {
+                $current_stock = $stock_result->fetch_assoc()['stock_quantity'];
+
+                // Check if there's enough stock
+                if ($current_stock >= $item['quantity']) {
+                    // Update stock in stock_history
+                    $update_stock_query = "UPDATE stock_history SET stock_quantity = stock_quantity - ? WHERE product_id = (SELECT id FROM product_list WHERE name = ?) AND deleted = 0";
+                    $update_stmt = $connection->prepare($update_stock_query);
+                    $update_stmt->bind_param("is", $item['quantity'], $item['name']);
+                    $update_stmt->execute();
+
+                    // Update quantity in product_list
+                    $update_product_query = "UPDATE product_list SET quantity = quantity - ? WHERE name = ?";
+                    $update_product_stmt = $connection->prepare($update_product_query);
+                    $update_product_stmt->bind_param("is", $item['quantity'], $item['name']);
+                    $update_product_stmt->execute();
+
+                    // Insert into order_items
+                    $item_query = "INSERT INTO order_items (order_id, item_name, price, quantity, image_url) VALUES (?, ?, ?, ?, ?)";
+                    $item_stmt = $connection->prepare($item_query);
+                    $item_stmt->bind_param("isdis", $order_id, $item['name'], $item['price'], $item['quantity'], $item['image_url']);
+                    $item_stmt->execute();
+                    $item_stmt->close(); // Close the item statement
+                } else {
+                    // Handle insufficient stock
+                    $_SESSION['order_error'] = "Insufficient stock for item: " . htmlspecialchars($item['name']);
+                }
+            } else {
+                // Handle case where product is not found
+                $_SESSION['order_error'] = "Product not found in stock history: " . htmlspecialchars($item['name']);
+            }
+
+            $stock_stmt->close(); // Close stock statement
         }
     }
 } else {
     // Handle the case where the order already exists
     $order_id = $result->fetch_assoc()['id']; // Get the existing order ID
-    // Optionally, you can add a message to inform the user
     $_SESSION['order_error'] = "Order has already been placed with this order number.";
 }
 
@@ -71,6 +105,9 @@ $payment_method_display = match ($payment_method) {
     'pickup' => 'Pickup Item',
     default => 'N/A',
 };
+
+// Close the database connection
+$connection->close();
 ?>
 
 <!DOCTYPE html>

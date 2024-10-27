@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $_SESSION['user_role'] = 'admin'; // Set user role as 'admin'
 
                     // Redirect to admin dashboard
-                    header("location: /wbsif/admin/dashboard/dashboard.php");
+                    header("location: admin/dashboard/dashboard.php");
                     exit;
                 } else {
                     // Account is inactive
@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
             } else {
                 $errorMessage = "<div style='color: red; text-align: center; margin-top: 20px; font-size: 14px;'>Invalid email or password.</div>";
-            }
+            } 
         } else {
             // If not admin, check the client_list table for client users
             $sqlClient = "SELECT * FROM client_list WHERE email = ? AND status = 'active'";
@@ -99,14 +99,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Login</title>
 </head>
-<body class="bg-[url('/wbsif/login/images/bg1.png')] bg-center bg-cover bg-fixed min-h-screen flex items-center justify-center p-4">
-
+<body class="bg-[url('login/images/bg1.png')] bg-center bg-cover bg-fixed min-h-screen flex items-center justify-center p-4">
     <div class="bg-neutral-100 rounded-lg shadow-lg w-96 max-w-md shadow-black-500/50 p-6">
         <div class="flex items-center p-2 relative">
-            <img src="/wbsif/login/images/logo.jpg" class="w-10 h-10 rounded-full cursor-pointer absolute left-2">
+            <img src="login/images/logo.jpg" class="w-10 h-10 rounded-full cursor-pointer absolute left-2">
             <h1 class="text-xl font-semibold text-black mx-auto">Login</h1>
         </div>
-
         <?php
         if (!empty($errorMessage)) {
             echo "
@@ -120,12 +118,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
        <form action="#" method="post" class="space-y-2 mt-2">
     <div class="relative">
         <input type="email" name="email" required placeholder="Email" value="<?php echo htmlspecialchars($email); ?>" class="w-full p-2 pr-10 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-sky-900">
-        <img src="/wbsif/login/images/icons8-user-24 (1).png" alt="User Icon" class="absolute right-2 top-1/2 transform -translate-y-1/2 w-5 h-5">
+        <img src="login/images/icons8-user-24 (1).png" alt="User Icon" class="absolute right-2 top-1/2 transform -translate-y-1/2 w-5 h-5">
     </div>
 
     <div class="relative">
         <input type="password" name="password" placeholder="Password" required class="w-full p-2 pr-10 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-sky-900">
-        <img src="/wbsif/login/images/icons8-lock-30.png" alt="User Icon" class="absolute right-2 top-1/2 transform -translate-y-1/2 w-5 h-5">
+        <img src="login/images/icons8-lock-30.png" alt="User Icon" class="absolute right-2 top-1/2 transform -translate-y-1/2 w-5 h-5">
     </div>
 
     <div class="flex flex-col sm:flex-row justify-center items-center gap-4">

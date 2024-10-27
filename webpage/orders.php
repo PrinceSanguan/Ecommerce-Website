@@ -116,8 +116,6 @@ if (isset($_GET['order_id'])) {
 ?>
 
 
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>

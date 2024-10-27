@@ -17,79 +17,6 @@ if ($connection->connect_error) {
 $user_email = $_SESSION['user_email'];
 $user_name = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : '';
 
-// Handle adding item to cart when coming from checkout button
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['product_id'])) {
-    $product_id = $_POST['product_id'];
-    $quantity = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1;
-    
-    // Fetch the product details, including stock
-    $query = "SELECT p.*, IFNULL(SUM(sh.stock_quantity), 0) AS stock_quantity 
-              FROM product_list AS p
-              LEFT JOIN stock_history AS sh ON p.id = sh.product_id AND sh.deleted = 0 
-              WHERE p.id = ?";
-    
-    $stmt = $connection->prepare($query);
-    $stmt->bind_param("i", $product_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows > 0) {
-        $product = $result->fetch_assoc();
-        
-        // Check if the product is in stock
-        if (isset($product['stock_quantity']) && $product['stock_quantity'] > 0) {
-            // Prepare the cart item
-            $cart_item = [
-                'id' => $product['id'],
-                'name' => $product['name'],
-                'price' => $product['price'],
-                'quantity' => $quantity,
-                'image_url' => $product['image'],
-                'brand' => $product['brand'],
-                'category' => $product['category']
-            ];
-
-            // Initialize cart if not exists
-            if (!isset($_SESSION['cart']) || !is_array($_SESSION['cart'])) {
-                $_SESSION['cart'] = [];
-            }
-
-            // Check if product already exists in cart
-            $found = false;
-            foreach ($_SESSION['cart'] as &$item) {
-                if (is_array($item) && $item['id'] == $product_id) {
-                    $item['quantity'] += $quantity;
-                    $found = true;
-                    break;
-                }
-            }
-
-            // Add new item if not found
-            if (!$found) {
-                $_SESSION['cart'][] = $cart_item;
-
-                // Insert into cart table
-                $insert_query = "INSERT INTO cart (user_email, product_id, product_name, quantity, price) 
-                               VALUES (?, ?, ?, ?, ?)";
-                $insert_stmt = $connection->prepare($insert_query);
-                $insert_stmt->bind_param("sssid", 
-                    $user_email, 
-                    $product['id'], 
-                    $product['name'], 
-                    $quantity, 
-                    $product['price']
-                );
-                $insert_stmt->execute();
-                $insert_stmt->close();
-            }
-        } else {
-            $_SESSION['error_message'] = "This product is out of stock";
-            header("Location: products.php");
-            exit;
-        }
-    }
-}
-
 // Fetch client details including phone number
 $client_query = "SELECT firstname, lastname, phone, address FROM client_list WHERE email = ?";
 $stmt = $connection->prepare($client_query);
@@ -98,6 +25,13 @@ $stmt->execute();
 $result = $stmt->get_result();
 $client = $result->fetch_assoc();
 
+// Redirect to cart if the cart is empty
+if (empty($_SESSION['cart'])) {
+    // Redirect to the cart page with a message
+    $_SESSION['error'] = "Please add to cart first before you checkout!";
+    header("Location: products.php");
+    exit();
+}
 // Calculate total price
 $total_price = 0;
 foreach ($_SESSION['cart'] as $item) {
@@ -113,12 +47,6 @@ foreach ($_SESSION['cart'] as $item) {
         $item_count += $item['quantity'];
     }
 }
-
-// If cart is empty after attempting to add items, redirect to products
-if (empty($_SESSION['cart'])) {
-    header("Location: products.php");
-    exit();
-}
 ?>
 
 <!DOCTYPE html>
@@ -131,7 +59,7 @@ if (empty($_SESSION['cart'])) {
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
-<div class="bg-[url('images/bg1.png')] bg-center bg-cover bg-fixed min-h-screen w-full pt-6 flex flex-col">
+<div class="bg-[url('../admin/images/bg1.png')] bg-center bg-cover bg-fixed min-h-screen w-full pt-6 flex flex-col">
     <!-- Fixed Header -->
     <div class="header-fixed w-full flex items-center">
         <button id="menu-toggle" class="lg:hidden text-white text-xl px-8 py-4 rounded-md absolute">
@@ -140,7 +68,7 @@ if (empty($_SESSION['cart'])) {
 
         <div class="px-20 p-2 flex flex-col lg:flex-row items-center mb-2 border-b-stone-100 flex-1">
             <div class="flex items-center mb-4 lg:mb-0">
-                <img src="images/logo.jpg" class="w-12 h-12 rounded-full cursor-pointer">
+                <img src="../login/images/logo.jpg" class="w-12 h-12 rounded-full cursor-pointer">
                 <h1 class="ml-4 text-white font-extrabold text-xl cursor-pointer">R K E</h1>
             </div>
             <ul id="nav-links" class="lg:flex flex-1 justify-center text-center">
@@ -202,7 +130,7 @@ if (empty($_SESSION['cart'])) {
                             <?php 
                                 $image_url = isset($item['image_url']) && !empty($item['image_url']) ? htmlspecialchars($item['image_url']) : 'default-image.jpg'; 
                             ?>
-                            <img src="../../uploads/<?php echo $image_url; ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" class="w-20 h-auto rounded">
+                            <img src="../uploads/<?php echo $image_url; ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" class="w-20 h-auto rounded">
                             <span class="ml-4"><?php echo htmlspecialchars($item['name']); ?> (<?php echo $item['quantity']; ?>)</span>
                         </div>
                         <span>₱<?php echo number_format($item['price'] * $item['quantity'], 2); ?></span>
@@ -228,7 +156,7 @@ if (empty($_SESSION['cart'])) {
             <div class="flex-1 min-w-[150px]"> <!-- Set a minimum width -->
                 <label class="flex flex-col items-center p-6 min-h-[220px] border border-gray-300 rounded-lg hover:shadow-md transition duration-200 cursor-pointer payment-option" data-payment-method="gcash">
                     <input type="radio" id="gcash" name="payment_method" value="gcash" required class="form-radio h-4 w-4 text-green-600 border-gray-300 focus:ring-green-500 hidden" onchange="showGcashMessage(); hidePickupAddress();">
-                    <img src="/webpage/images/gcash-image (2).png" alt="Gcash" class="w-24 h-24 mb-2"> <!-- Increased Gcash Image Size -->
+                    <img src="../webpage/images/gcash-image (2).png" alt="Gcash" class="w-24 h-24 mb-2"> <!-- Increased Gcash Image Size -->
                     <span class="text-gray-700">Gcash</span>
                 </label>
             </div>
@@ -237,7 +165,7 @@ if (empty($_SESSION['cart'])) {
             <div class="flex-1 min-w-[150px]"> <!-- Set a minimum width -->
                 <label class="flex flex-col items-center p-6 min-h-[220px] border border-gray-300 rounded-lg hover:shadow-md transition duration-200 cursor-pointer payment-option" data-payment-method="cod">
                     <input type="radio" id="cod" name="payment_method" value="cod" required class="form-radio h-4 w-4 text-green-600 border-gray-300 focus:ring-green-500 hidden" onchange="hideAllMessages(); enablePlaceOrderButton();">
-                    <img src="/webpage/images/cod-image (1).png" alt="Cash on Delivery" class="w-24 h-24 mb-2"> <!-- Increased COD Image Size -->
+                    <img src="../webpage/images/cod-image (1).png" alt="Cash on Delivery" class="w-24 h-24 mb-2"> <!-- Increased COD Image Size -->
                     <span class="text-gray-700">Cash on Delivery (COD)</span>
                 </label>
             </div>
@@ -246,7 +174,7 @@ if (empty($_SESSION['cart'])) {
             <div class="flex-1 min-w-[150px]"> <!-- Set a minimum width -->
                 <label class="flex flex-col items-center p-6 min-h-[220px] border border-gray-300 rounded-lg hover:shadow-md transition duration-200 cursor-pointer payment-option" data-payment-method="pickup">
                     <input type="radio" id="pickup" name="payment_method" value="pickup" required class="form-radio h-4 w-4 text-green-600 border-gray-300 focus:ring-green-500 hidden" onchange="showPickupAddress(); hideGcashMessage(); enablePlaceOrderButton();">
-                    <img src="/webpage/images/icons8-item-48.png" alt="Pickup" class="w-24 h-24 mb-2"> <!-- Increased Pickup Image Size -->
+                    <img src="../webpage/images/icons8-item-48.png" alt="Pickup" class="w-24 h-24 mb-2"> <!-- Increased Pickup Image Size -->
                     <span class="text-gray-700">Pickup Item</span>
                 </label>
             </div>

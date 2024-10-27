@@ -34,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // echo "Redirecting...";
         
         // Redirect to the view_product.php page
-        header("Location: /wbsif/admin/inventory/view_product.php?id=$product_id");
+        header("Location: ../inventory/view_product.php?id=$product_id");
         exit(); // Make sure no further code is executed
     } else {
         echo "Error adding stock: " . $conn->error;
